@@ -1,0 +1,49 @@
+name: Publish to Instagram
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "publish | check | dry-run"
+        default: check
+        required: true
+      post:
+        description: "Post id for dry-run (e.g. P03)"
+        default: P03
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run publisher
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
+        run: |
+          MODE="${{ github.event.inputs.mode || 'publish' }}"
+          if [ "$MODE" = "check" ]; then python publish.py --check
+          elif [ "$MODE" = "dry-run" ]; then python publish.py --dry-run "${{ github.event.inputs.post }}"
+          else python publish.py
+          fi
+      - name: Save status in posts.csv
+        if: always()
+        run: |
+          git config user.name "instagram-bot"
+          git config user.email "instagram-bot@users.noreply.github.com"
+          git add posts.csv
+          git diff --cached --quiet || (git commit -m "Update post status" && git push)
