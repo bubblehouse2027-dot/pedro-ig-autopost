@@ -71,10 +71,13 @@ def due_utc(row):
 
 
 def media_files(row):
+    # Media may sit in media/ or directly in the repository's top folder.
     pattern = row["media"].strip()
-    files = sorted(os.path.basename(p) for p in glob.glob(os.path.join(HERE, "media", pattern)))
+    files = sorted(os.path.relpath(p, HERE) for p in glob.glob(os.path.join(HERE, "media", pattern)))
     if not files:
-        raise ApiError(f"{row['id']}: no file in media/ matches '{pattern}'")
+        files = sorted(os.path.relpath(p, HERE) for p in glob.glob(os.path.join(HERE, pattern)))
+    if not files:
+        raise ApiError(f"{row['id']}: no file matches '{pattern}' (looked in media/ and the top folder)")
     if row["type"] == "reel" and len(files) != 1:
         raise ApiError(f"{row['id']}: a reel needs exactly one video, found {files}")
     if row["type"] == "carousel":
@@ -86,8 +89,8 @@ def media_files(row):
     return files
 
 
-def url_for(name):
-    return f"{BASE}/media/{urllib.parse.quote(name)}"
+def url_for(relpath):
+    return f"{BASE}/{urllib.parse.quote(relpath.replace(os.sep, '/'))}"
 
 
 def check_url(url):

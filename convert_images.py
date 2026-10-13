@@ -7,7 +7,8 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 converted = 0
-for png in sorted(glob.glob(os.path.join(HERE, "media", "*.png"))):
+PNGS = glob.glob(os.path.join(HERE, "media", "*.png")) + glob.glob(os.path.join(HERE, "*.png"))
+for png in sorted(PNGS):
     jpg = png[:-4] + ".jpg"
     if os.path.exists(jpg):
         continue
@@ -25,7 +26,7 @@ for png in sorted(glob.glob(os.path.join(HERE, "media", "*.png"))):
 print(converted, "image(s) converted")
 
 groups = defaultdict(list)
-for jpg in sorted(glob.glob(os.path.join(HERE, "media", "*.jpg"))):
+for jpg in sorted(glob.glob(os.path.join(HERE, "media", "*.jpg")) + glob.glob(os.path.join(HERE, "*.jpg"))):
     m = re.match(r"(P\d+)_\d+\.jpg$", os.path.basename(jpg))
     if m:
         groups[m.group(1)].append(jpg)
