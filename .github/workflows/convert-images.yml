@@ -1,0 +1,29 @@
+name: Convert images to JPEG
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+      - run: python convert_images.py
+      - name: Save JPEGs
+        run: |
+          git config user.name "instagram-bot"
+          git config user.email "instagram-bot@users.noreply.github.com"
+          git add -A -- '*.jpg'
+          git diff --cached --quiet || (git commit -m "Add JPEG versions of images" && git push)
+      - name: Rebuild GitHub Pages so the JPEGs get public links
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "/repos/${{ github.repository }}/pages/builds" || echo "Pages rebuild request failed; upload any small file to trigger it"
