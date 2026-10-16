@@ -1,7 +1,7 @@
 id,date,time,type,media,thumb_offset_ms,status,instagram_id
 P01,2026-12-06,18:30,carousel,P01_*.jpg,0,pending,
 P02,2026-10-14,13:00,carousel,P02_*.jpg,0,published,18018521921741009
-P03,2026-10-16,18:30,reel,P03.mp4,0,pending,
+P03,2026-10-16,18:30,reel,P03.mp4,0,published,18177504829454121
 P04,2026-10-19,18:30,reel,P04.mp4,0,pending,
 P05,2026-10-21,18:30,carousel,P05_*.jpg,0,pending,
 P06,2026-10-23,18:30,reel,P06.mp4,0,pending,
