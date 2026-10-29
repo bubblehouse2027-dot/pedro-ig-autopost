@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish due Instagram posts from posts.csv via the official Instagram API (Instagram Login).
+"""Publish due Instagram posts from posts.csv via the official Instagram API.
 
 Modes
   python publish.py              publish every pending post whose time has come
@@ -9,7 +9,10 @@ Modes
                                  but do NOT publish it (the draft expires by itself in 24 h)
 
 Environment
-  IG_ACCESS_TOKEN   Instagram user access token (GitHub secret). Never printed.
+  IG_ACCESS_TOKEN   access token (GitHub secret). Never printed.
+                    With IG_USER_ID set: a Facebook Page token (never expires), used on graph.facebook.com.
+                    Without IG_USER_ID: an Instagram Login token (expires after 60 days), used on graph.instagram.com.
+  IG_USER_ID        Instagram business account id, e.g. 17841400786098098 (GitHub secret)
   PAGES_BASE_URL    e.g. https://yourname.github.io/pedro-ig-autopost  (no trailing slash)
   MAX_LATE_HOURS    optional, default 24: posts later than this are marked "missed", not posted
 """
@@ -17,7 +20,8 @@ import csv, glob, json, os, sys, time, urllib.error, urllib.parse, urllib.reques
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
-API = "https://graph.instagram.com"
+IG_USER_ID = os.environ.get("IG_USER_ID", "").strip()
+API = "https://graph.facebook.com/v26.0" if IG_USER_ID else "https://graph.instagram.com"
 TZ = ZoneInfo("Europe/Lisbon")
 HERE = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(HERE, "posts.csv")
@@ -144,6 +148,10 @@ def build(ig_id, row):
 
 
 def account():
+    if IG_USER_ID:  # Facebook Login: Page token + Instagram business account id
+        me = call("GET", IG_USER_ID, {"fields": "id,username"})
+        me["account_type"] = "BUSINESS"
+        return IG_USER_ID, me
     me = call("GET", "me", {"fields": "user_id,username,account_type"})
     return me["user_id"], me
 
