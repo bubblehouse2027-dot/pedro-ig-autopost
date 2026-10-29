@@ -33,6 +33,7 @@ jobs:
       - name: Run publisher
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
           PAGES_BASE_URL: ${{ vars.PAGES_BASE_URL }}
         run: |
           MODE="${{ github.event.inputs.mode || 'publish' }}"
