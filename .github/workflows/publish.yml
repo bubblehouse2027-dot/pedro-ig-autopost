@@ -1,8 +1,7 @@
 name: Publish to Instagram
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
+  # schedule removed 2026-11-24: this client now runs on the autopilot-moinho engine
   workflow_dispatch:
     inputs:
       mode:
